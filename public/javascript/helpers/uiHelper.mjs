@@ -55,3 +55,39 @@ export const clearContainer = node => {
   }
   return node;
 };
+
+export const createModal = ({ title, bodyElement, onClose }) => {
+  const layer = createElement({ tagName: 'div', className: 'modal-layer' });
+  const modalContainer = createElement({ tagName: 'div', className: 'modal-root' });
+  const header = createHeader(title, onClose);
+  const bodyContent = createElement({ tagName: 'div', className: 'modal-body' });
+
+  bodyContent.append(bodyElement);
+  modalContainer.append(header, bodyContent);
+  layer.append(modalContainer);
+
+  return layer;
+}
+
+const createHeader = (title, onClose) => {
+  const headerElement = createElement({ tagName: 'div', className: 'modal-header' });
+  const titleElement = createElement({ tagName: 'span' });
+  const closeButton = createElement({ tagName: 'div', className: 'close-btn' });
+
+  titleElement.innerText = title;
+  closeButton.innerText = '×';
+
+  const close = () => {
+    hideModal();
+    onClose();
+  };
+  closeButton.addEventListener('click', close);
+  headerElement.append(title, closeButton);
+
+  return headerElement;
+}
+
+const hideModal = () => {
+  const modal = document.getElementsByClassName('modal-layer')[0];
+  modal?.remove();
+}

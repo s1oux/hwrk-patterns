@@ -81,7 +81,7 @@ socket.on('startGame', (text, time) => {
 });
 
 socket.on('endGame', (results) => {
-  endGame(username, results.map(result => `${result.username} = ${result.remained}`), keyPressHandler);
+  endGame(username, results, keyPressHandler);
 });
 
 socket.on('playerProgressUpdate', (player) => {

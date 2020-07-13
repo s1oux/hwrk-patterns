@@ -1,10 +1,10 @@
 import {
   createElement,
-  createParagraphElement,
   getElement,
   showElement,
   hideElement,
   addClass,
+  createModal,
   removeClass,
   clearContainer
 } from '../helpers/uiHelper.mjs';
@@ -58,8 +58,29 @@ export const endGame = (player, results, keyPressHandler) => {
 
 const displayResults = (results) => {
   // make element to show player results
-  alert(results);
-}
+  // alert(results);
+  const resultsContainer = createElement({
+    tagName: "div"
+  });
+  const resultElements = results.map(result => {
+    const resultElement = createElement({
+      tagName: "div"
+    });
+    resultElement.innerText = `${result.username} finished on ${60 - result.remained}s.`;
+    return resultElement;
+  });
+
+  resultElements.forEach(resultElement => resultsContainer.append(resultElement));
+  console.log(resultsContainer);
+
+  const modalContainer = getElement('root');
+  const modal = createModal({
+    title: "Results",
+    bodyElement: resultsContainer,
+    onClose: () => {}
+  });
+  modalContainer.append(modal);
+};
 
 export const hideToggleReadyBtn = () => {
   const toggleReadyBtn = document.getElementById('toggle-ready__btn');
