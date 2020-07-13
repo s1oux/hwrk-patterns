@@ -1,6 +1,7 @@
 import express from "express";
 import http from "http";
 import socketIO from "socket.io";
+
 import socketHandler from "./socket";
 import routes from "./routes";
 import { STATIC_PATH, PORT } from "./config";
@@ -10,6 +11,10 @@ const httpServer = http.Server(app);
 const io = socketIO(httpServer);
 
 app.use(express.static(STATIC_PATH));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 routes(app);
 
 app.get("*", (req, res) => {

@@ -1,0 +1,91 @@
+#toggle-ready__btn {
+  height: 40px;
+  font-size: 15px;
+  border: 1px solid var(--main-button-border-color);
+  background-color: var(--main-button-background-color);
+  text-transform: uppercase;
+  padding: 0 15px;
+}
+
+.content {
+  margin: 0 5% 0;
+}
+
+.grid-container {
+  margin: 20px 0;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+}
+
+.player__list {
+  display: flex;
+  flex-direction: column;
+  align-content: space-between;
+  height: 100%;
+}
+
+.players__player {
+  border: 1px solid var(--main-button-border-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 5px;
+}
+
+.players__player:last-child {
+  margin-bottom: 0;
+}
+
+.game__area {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer {
+  font-size: 2rem;
+}
+
+.game__timer {
+  position: absolute;
+  top: 0;
+  left: calc(50% - 1rem);
+}
+
+.ready-sign {
+  border-radius: 50%;
+  display: inline-block;
+  height: 10px;
+  margin-right: 5px;
+  width: 10px;
+}
+
+.ready {
+  background-color: green;
+}
+
+.not_ready {
+  background-color: red;
+}
+
+.progress-bar__container {
+  background-color: lightgray;
+  height: 20px;
+  width: 75%;
+}
+
+.progress-bar {
+  background-color: green;
+  height: 20px;
+  width: 0;
+}
+
+.coloured {
+  background-color: lightgreen;
+}
+
+.underlined {
+  border-bottom: 1px solid limegreen;
+}

@@ -1,7 +1,7 @@
 {
   "name": "http-ws-hw-starter",
   "version": "1.0.0",
-  "description": "Starter for HTTP / WS homework. Binary Studio Academy",
+  "description": "Solution for HTTP / WS homework. BSA-20",
   "main": "index.js",
   "scripts": {
     "start": "nodemon server.js --exec \"babel-node\""
@@ -10,9 +10,10 @@
     "bsa",
     "homework"
   ],
-  "author": "Kyrylo Burmelov",
+  "author": "a.fedorchenko",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "socket.io": "^2.3.0"
   },
@@ -20,7 +21,6 @@
     "@babel/core": "^7.10.2",
     "@babel/node": "^7.10.1",
     "@babel/preset-env": "^7.10.2",
-    "@babel/register": "^7.10.1",
-    "nodemon": "^2.0.4"
+    "@babel/register": "^7.10.1"
   }
 }

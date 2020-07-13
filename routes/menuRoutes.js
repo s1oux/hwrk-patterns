@@ -2,13 +2,12 @@ import { Router } from "express";
 import path from "path";
 
 import { HTML_FILES_PATH } from "../config";
-// import gameRooms from '../utils/gameRooms';
 
 const router = Router();
 
 router
   .get("/", (req, res) => {
-    const page = path.join(HTML_FILES_PATH, "game.html");
+    const page = path.join(HTML_FILES_PATH, "menu.html");
     res.sendFile(page);
   });
 

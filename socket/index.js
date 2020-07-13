@@ -1,8 +1,7 @@
-import * as config from "./config";
+import menu from './menu';
+import game from './game';
 
 export default io => {
-  io.on("connection", socket => {
-    const username = socket.handshake.query.username;
-
-  });
+  game(io.of("/game"));
+  menu(io.of("/menu"));
 };

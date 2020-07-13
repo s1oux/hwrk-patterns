@@ -1,9 +1,9 @@
-Starter for **HTTP, REST / WS** homework. Binary Studio Academy
+Solution for **HTTP, REST / WS** homework. BSA-20
 
 ## Installation
 
-`yarn install`
+`yarn install` | `npm install`
 
-`yarn start`
+`yarn start` | `npm run start`
 
 open http://localhost:3002/
