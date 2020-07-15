@@ -35,13 +35,13 @@ export const removeClass = (element, className) => {
 export const formatClassNames = className => className.split(" ").filter(Boolean);
 
 
-export const createParagraphElement = (text, id = '') => {
+export const createParagraphElement = (text, id = "") => {
   let attributes = {};
   if(id) {
     attributes.id = id;
   }
   const paragraph = createElement({
-    tagName: 'p',
+    tagName: "p",
     attributes
   });
 
@@ -57,10 +57,10 @@ export const clearContainer = node => {
 };
 
 export const createModal = ({ title, bodyElement, onClose }) => {
-  const layer = createElement({ tagName: 'div', className: 'modal-layer' });
-  const modalContainer = createElement({ tagName: 'div', className: 'modal-root' });
+  const layer = createElement({ tagName: "div", className: "modal-layer" });
+  const modalContainer = createElement({ tagName: "div", className: "modal-root" });
   const header = createHeader(title, onClose);
-  const bodyContent = createElement({ tagName: 'div', className: 'modal-body' });
+  const bodyContent = createElement({ tagName: "div", className: "modal-body" });
 
   bodyContent.append(bodyElement);
   modalContainer.append(header, bodyContent);
@@ -70,24 +70,24 @@ export const createModal = ({ title, bodyElement, onClose }) => {
 }
 
 const createHeader = (title, onClose) => {
-  const headerElement = createElement({ tagName: 'div', className: 'modal-header' });
-  const titleElement = createElement({ tagName: 'span' });
-  const closeButton = createElement({ tagName: 'div', className: 'close-btn' });
+  const headerElement = createElement({ tagName: "div", className: "modal-header" });
+  const titleElement = createElement({ tagName: "span" });
+  const closeButton = createElement({ tagName: "div", className: "close-btn" });
 
   titleElement.innerText = title;
-  closeButton.innerText = '×';
+  closeButton.innerText = "×";
 
   const close = () => {
     hideModal();
     onClose();
   };
-  closeButton.addEventListener('click', close);
+  closeButton.addEventListener("click", close);
   headerElement.append(title, closeButton);
 
   return headerElement;
 }
 
 const hideModal = () => {
-  const modal = document.getElementsByClassName('modal-layer')[0];
+  const modal = document.getElementsByClassName("modal-layer")[0];
   modal?.remove();
 }

@@ -9,7 +9,9 @@ import {
   updateTextEmphasize,
   updateProgressBar,
   startGame,
-  endGame
+  endGame,
+  showComment,
+  renderCommentContainer
 } from './views/gameView.mjs';
 
 const username = sessionStorage.getItem("username");
@@ -17,32 +19,25 @@ const username = sessionStorage.getItem("username");
 const url = `${window.location.origin}${window.location.pathname}`;
 
 if(!username) {
-  window.location.replace('/login');
+  window.location.replace("/login");
 }
 
-const socket = io(url);
+const socket = io(url, { query: { username } });
 
 let gameState = {
   playing: false
 };
 
-const urlParams = new URLSearchParams(window.location.search);
-const room = urlParams.get('room');
-const params = {
-  username,
-  room
-};
+socket.on("connect", () => {
+  const room = localStorage.getItem("room");
 
-socket.on('connect', () => {
-  socket.emit('join', params, (err) => {
+  socket.emit("join", room, (err) => {
     if(err) {
       alert(err);
-      window.location.replace('/menu');
+      window.location.replace("/menu");
     } else {
-      renderGameContainer(gameState, () => {
-
-      }, (event) => {
-        socket.emit('togglePlayerReady', username, (err) => {
+      renderGameContainer(gameState, (event) => {
+        socket.emit("togglePlayerReady", username, (err) => {
           if(err) {
             alert(err);
           } else {
@@ -54,45 +49,49 @@ socket.on('connect', () => {
   });
 });
 
-socket.on('updateGameState', state => {
+socket.on("updateGameState", state => {
   updateState(state);
 });
 
-socket.on('updatePlayerList', (players) => {
+socket.on("updatePlayerList", (players) => {
   updatePlayerList(players, username);
 });
 
-socket.on('startGameTimer', (time) => {
+socket.on("startGameTimer", (time) => {
   hideToggleReadyBtn();
+  renderCommentContainer();
   showTimer(time);
 });
 
-socket.on('updateStartTimer', (remainedTime) => {
+socket.on("updateStartTimer", (remainedTime) => {
   updateStartTimer(remainedTime);
 });
 
-socket.on('updateGameTimer', (remainedTime) => {
+socket.on("updateGameTimer", (remainedTime) => {
   updateGameTimer(remainedTime);
 });
 
-socket.on('startGame', (text, time) => {
+socket.on("startGame", (text, time) => {
   startGame(username, text, time, keyPressHandler);
-  socket.emit('gameInitialization', text);
+  socket.emit("gameInitialization", text);
 });
 
-socket.on('endGame', (results) => {
+socket.on("newComment", (commentMessage) => {
+  showComment(commentMessage);
+});
+
+socket.on("endGame", (results) => {
   endGame(username, results, keyPressHandler);
 });
 
-socket.on('playerProgressUpdate', (player) => {
+socket.on("playerProgressUpdate", (player) => {
   updateProgressBar(player);
   updateTextEmphasize(player);
 });
 
-socket.on('disconnect', () => {
-  console.log(`'${username}' disconnected from '${room}'`);
+socket.on("disconnect", () => {
+  console.log(`'${username}' disconnected`);
 });
-
 
 const updateState = state => {
   gameState = {
@@ -102,5 +101,5 @@ const updateState = state => {
 }
 
 const keyPressHandler = (event) => {
-  socket.emit('keyPress', event.key);
+  socket.emit("keyPress", event.key);
 }

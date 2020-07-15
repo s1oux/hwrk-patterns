@@ -1,5 +1,5 @@
 import loginRoutes from "./loginRoutes";
-import menuRoutes from './menuRoutes';
+import menuRoutes from "./menuRoutes";
 import gameRoutes from "./gameRoutes";
 
 export default app => {

@@ -16,7 +16,7 @@ const onClickSubmitButton = () => {
   if (!inputValue) {
     return;
   }
-  post('login', { username: inputValue })
+  post("login", { username: inputValue })
     .then(res => {
       if(res.success) {
         sessionStorage.setItem("username", inputValue);

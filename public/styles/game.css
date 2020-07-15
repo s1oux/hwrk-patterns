@@ -17,6 +17,35 @@
   grid-template-columns: 1fr 2fr;
 }
 
+.comment-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.comment {
+  position: relative;
+  background-color: #fff;
+	padding: 1.125rem 1.5rem;
+	font-size: 1.25em;
+	border-radius: 0.75rem;
+  box-shadow:	0 0.125rem 0.5rem rgba(0, 0, 0, .3), 0 0.0625rem 0.125rem rgba(0, 0, 0, .2);
+}
+
+.comment::before {
+	content: '';
+	position: absolute;
+	width: 0;
+	height: 0;
+	bottom: 100%;
+	right: 25%;
+	border: .75rem solid transparent;
+	border-top: none;
+
+	border-bottom-color: #fff;
+	filter: drop-shadow(0 -0.0625rem 0.0625rem rgba(0, 0, 0, .1));
+}
+
 .player__list {
   display: flex;
   flex-direction: column;
@@ -82,10 +111,15 @@
   width: 0;
 }
 
+.game__text {
+  font-size: 1.5rem;
+}
+
 .coloured {
   background-color: lightgreen;
 }
 
 .underlined {
-  border-bottom: 1px solid limegreen;
+  text-decoration: underline;
+  text-decoration-color: limegreen;
 }

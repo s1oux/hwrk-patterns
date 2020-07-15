@@ -9,22 +9,19 @@ import {
   clearContainer
 } from '../helpers/uiHelper.mjs';
 
-
-export const renderGameContainer = (state, keyPressHandler, toggleReadyHandler) => {
+export const renderGameContainer = (state, toggleReadyHandler) => {
   if(state.playing) {
 
   } else {
-    const toggleReadyBtn = document.getElementById('toggle-ready__btn');
-    toggleReadyBtn.addEventListener('click', toggleReadyHandler);
+    const toggleReadyBtn = getElement("toggle-ready__btn");
+    toggleReadyBtn.addEventListener("click", toggleReadyHandler);    
   }
 };
 
 export const startGame = (player, text, initTime, keyPressHandler) => {
-  const backToMenuBtn = getElement('back-menu__btn');
-  hideElement(backToMenuBtn);
-  const startTimer = getElement('start-timer');
-  hideElement(startTimer);
-  const gameArea = getElement('game-area');
+  hideElement(getElement("back-menu__btn"));
+  hideElement(getElement("start-timer"));
+  const gameArea = getElement("game-area");
   showElement(gameArea);
   const gameText = createElement({
     tagName: "span",
@@ -32,33 +29,44 @@ export const startGame = (player, text, initTime, keyPressHandler) => {
     attributes: {
       id: `game-text__${player}`
     }
-  });
-  const gameTimer = getElement('game-timer');
+  })
   gameText.innerText = text;
-  gameTimer.innerText = initTime;
+  getElement("game-timer").innerText = initTime;
   gameArea.append(gameText);
+  clearContainer(getElement("comment-container"));
 
-  window.addEventListener('keypress', keyPressHandler);
+  window.addEventListener("keypress", keyPressHandler);
 };
 
 export const endGame = (player, results, keyPressHandler) => {
-  const gameTimer = getElement('game-timer');
-  const gameText = getElement(`game-text__${player}`);
-  const gameArea = getElement('game-area');
-  const backToMenuBtn = getElement('back-menu__btn');
-  const toggleReadyBtn = getElement('toggle-ready__btn');
-  gameText.remove();
-  hideElement(gameArea);
-  gameTimer.innerText = '';
-  showElement(toggleReadyBtn);
-  showElement(backToMenuBtn);
-  displayResults(results);
-  window.removeEventListener('keypress', keyPressHandler);
+  getElement("game-timer").innerText = '';
+  const text = getElement(`game-text__${player}`);
+  text.remove();
+  hideElement(getElement("game-area"));  
+  showElement(getElement("toggle-ready__btn"));
+  showElement(getElement("back-menu__btn"));
+  // displayResults(results);
+  window.removeEventListener("keypress", keyPressHandler);
+}
+
+export const renderCommentContainer = () => {
+  const commentContainer = getElement("comment-container");
+  clearContainer(commentContainer);
+  showElement(commentContainer);
+};
+
+export const showComment = (commentBody) => {
+  const commentContainer = getElement("comment-container");
+  clearContainer(commentContainer);
+  const comment = createElement({
+    tagName: "div",
+    className: "comment"
+  });
+  comment.innerText = commentBody;
+  commentContainer.appendChild(comment);
 }
 
 const displayResults = (results) => {
-  // make element to show player results
-  // alert(results);
   const resultsContainer = createElement({
     tagName: "div"
   });
@@ -66,14 +74,13 @@ const displayResults = (results) => {
     const resultElement = createElement({
       tagName: "div"
     });
-    resultElement.innerText = `${result.username} finished on ${60 - result.remained}s.`;
+    resultElement.innerText = `${result.username} finished in ${result.remained}s.`;
     return resultElement;
   });
 
   resultElements.forEach(resultElement => resultsContainer.append(resultElement));
-  console.log(resultsContainer);
 
-  const modalContainer = getElement('root');
+  const modalContainer = getElement("root");
   const modal = createModal({
     title: "Results",
     bodyElement: resultsContainer,
@@ -83,32 +90,29 @@ const displayResults = (results) => {
 };
 
 export const hideToggleReadyBtn = () => {
-  const toggleReadyBtn = document.getElementById('toggle-ready__btn');
-  addClass(toggleReadyBtn, 'display-none');
+  addClass(getElement("toggle-ready__btn"), "display-none");
 };
 
 export const showTimer = (seconds) => {
-  const timer = document.getElementById('start-timer');
-  removeClass(timer, 'display-none');
+  const timer = getElement("start-timer");
+  removeClass(timer, "display-none");
   timer.innerText = seconds;
 };
 
 export const updateStartTimer = seconds => {
-  const timer = document.getElementById('start-timer');
-  timer.innerText = seconds;
+  getElement("start-timer").innerText = seconds;
 };
 
 export const updateGameTimer = seconds => {
-  const timer = document.getElementById('game-timer');
-  timer.innerText = seconds;
+  getElement("game-timer").innerText = seconds;
 }
 
 export const updatePlayerList = (players, currentPlayer) => {
-  const playersList = document.getElementById('playerContainer');
+  const playersList = getElement("playerContainer");
   const playersCards = players.map(player => createPlayer(
     player.username === currentPlayer ? {
       ...player,
-      ownname: currentPlayer.concat(' (you)')
+      ownname: currentPlayer.concat(" (you)")
     } : player)
   );
   clearContainer(playersList);
@@ -119,16 +123,15 @@ export const updatePlayerList = (players, currentPlayer) => {
 export const updateReadyBtn = (player) => {
   const readyBtnElement = getElement(`toggle-ready__btn`);
   const readySign = getElement(`ready-sign__${player.username}`);
-  removeClass(readySign, player.ready ? 'not_ready' : 'ready');
-  addClass(readySign, player.ready ? 'ready' : "not_ready");
-  readyBtnElement.innerText = player.ready ? 'not ready' : 'ready';
+  removeClass(readySign, player.ready ? "not_ready" : "ready");
+  addClass(readySign, player.ready ? "ready" : "not_ready");
+  readyBtnElement.innerText = player.ready ? "not ready" : "ready";
 };
 
 export const updateProgressBar = (player) => {
   const progress = Math.floor((player.gameProgress.rightPrinted.length / player.gameProgress.text.length) * 100);
   
-  const progressBar = getElement(`progress-bar__${player.username}`);
-  progressBar.style.width = `${progress}%`;
+  getElement(`progress-bar__${player.username}`).style.width = `${progress}%`;
 };
 
 export const updateTextEmphasize = (player) => {
@@ -136,7 +139,7 @@ export const updateTextEmphasize = (player) => {
   if(text) {
     const initText = player.gameProgress.text;
     const printed = player.gameProgress.rightPrinted;
-    const index = player.gameProgress.currentPosition;
+    const index = player.gameProgress.positionInText;
     text.innerText = "";
 
     text.innerHTML = `
@@ -160,8 +163,7 @@ const createPlayer = (player) => {
   const title = createElement({
     tagName: "span",
     className: "player__title"
-  });
-  title.innerText = player.ownname || player.username;
+  }).innerText = player.ownname || player.username;
 
   const ready = createElement({
     tagName: "label",

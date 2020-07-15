@@ -1,20 +1,23 @@
 import * as config from "./config";
-import { texts } from '../data';
 import rooms from '../utils/gameRooms';
 import users from '../utils/users';
 import Timer from '../utils/timer';
+import Timings from '../utils/constants/gameConstants';
+import commentTypes from '../utils/constants/commentConstants';
+import GameFacade from '../utils/gameFacade';
+
 
 let gameTimer;
 let startTimer;
 
 export default io => {
+  const gameEmitFacade = new GameFacade(io);
   io.on("connection", socket => {
     const username = socket.handshake.query.username;
 
-    socket.on('join', (params, callback) => {
-      
-      const room = rooms.getGameRoom(params.room);
-      const player = users.getUser(params.username);
+    socket.on("join", (roomOnJoin, callback) => {
+      const room = rooms.getGameRoom(roomOnJoin);
+      const player = users.getUser(username);
 
       player.setSocketId(socket.id);
       player.setRoom(room.name);
@@ -34,13 +37,13 @@ export default io => {
         currentPlayer: player
       };
       socket.join(room.name);
-      io.to(room.name).emit('updatePlayerList', room.players);
-      io.to(room.name).emit('updateGameState', state);
+      gameEmitFacade.emitPlayerListUpdate(room);
+      gameEmitFacade.emitGameStateUpdate(state);
 
       callback();
     });
 
-    socket.on('togglePlayerReady', (username, callback) => {
+    socket.on("togglePlayerReady", (username, callback) => {
       const player = users.getUser(username);
       const room = rooms.getGameRoom(player.room);
       player.ready = !player.ready;
@@ -50,52 +53,58 @@ export default io => {
         currentPlayer: player
       };
 
-      io.to(room.name).emit('updatePlayerList', room.players);
-      io.to(room.name).emit('updateGameState', state);
+      gameEmitFacade.emitPlayerListUpdate(room);    
+      gameEmitFacade.emitGameStateUpdate(room, state);
       
-      if(room.players.length > 1 && room.players.every(player => player.ready)) {
-        io.to(room.name).emit('startGameTimer', config.SECONDS_TIMER_BEFORE_START_GAME);
+      if(gameEmitFacade.isPlayersReady(room)) {
+        gameEmitFacade.emitStartGameTimer(room);
+        gameEmitFacade.emitNewComment(room, commentTypes.GREET);
         
         startTimer = new Timer(
           config.SECONDS_TIMER_BEFORE_START_GAME,
-          (remained) => emitStartTimerDecrease(room, remained),
+          (remained) => gameEmitFacade.emitStartTimerDecrease(room, remained),
           () => startGame(room)
         );
       }
       callback();
     });
 
-    socket.on('gameInitialization', (text) => {
+    socket.on("gameInitialization", (text) => {
       const player = users.getUserByRoom(socket.id);
       player.setGameProgressInitText(text);
     });
 
-    socket.on('keyPress', (key) => {
+    socket.on("keyPress", (key) => {
       const player = users.getUserByRoom(socket.id);
       const room = rooms.getGameRoom(player.room);
         
-      if(player.getText()[player.getCurrentPosition()] === key) {
+      if(gameEmitFacade.isPlayerPrintCorrectLetter(player, key)) {
         player.setGameProgressPrintedText(key);
-        if(player.getGameProgress() === 100) {
-          player.setCompletedTime(gameTimer.getRemainedTime());
+        if(gameEmitFacade.isPlayerOnHalfRace(player)) {
+          gameEmitFacade.emitNewComment(room, commentTypes.HALF_RACE, { player: player });
         }
-        io.to(room.name).emit('playerProgressUpdate', player);
+
+        if(gameEmitFacade.isPlayerFinished(player)) {
+          player.setCompletedTime(gameTimer.getRemainedTime());          
+          gameEmitFacade.emitNewComment(room, commentTypes.PLAYER_FINISH, { player: player });
+        }
         
-        if(room.players.every(player => player.getGameProgress() === 100)) {
+        gameEmitFacade.emitPlayerProgressUpdate(room, player);
+        
+        if(gameEmitFacade.isAllPlayersFinished(room)) {
           gameTimer.stopTimer();
-          emitGameEnd(room, room.players.map(player => ({
-            username: player.username,
-            remained: player.gameProgress.completedAt
-          })));
+          
+          gameEmitFacade.emitNewComment(room, commentTypes.RACE_END);
+          gameEmitFacade.emitGameEnd(room);
           
           room.playing = false;
           room.players.forEach(player => player.resetGameAttributes());
-          io.to(room.name).emit('updatePlayerList', room.players);
+          gameEmitFacade.emitPlayerListUpdate(room);
         }
       }
-    })
+    });
 
-    socket.on('disconnect', () => {
+    socket.on("disconnect", () => {
       const player = users.getUserByRoom(socket.id);
       
       if(player) {
@@ -105,17 +114,20 @@ export default io => {
         player.resetGameAttributes();
         player.clearRoom();
         player.clearSocketId();
-        io.to(room.name).emit('updatePlayerList', room.players);
+        
+        gameEmitFacade.emitPlayerListUpdate(room);
         
         if(!room.players.length) {
           rooms.closeGameRoom(room.name);
         }
 
-        if(room.players.length > 1 && room.players.every(player => player.ready)) {
-          io.to(room.name).emit('startGameTimer', config.SECONDS_TIMER_BEFORE_START_GAME);
+        if(gameEmitFacade.isPlayersReady(room)) {
+          gameEmitFacade.emitStartGameTimer(room);
+          gameEmitFacade.emitNewComment(room, commentTypes.GREET);
+          
           startTimer = new Timer(
             config.SECONDS_TIMER_BEFORE_START_GAME,
-            (remained) => emitStartTimerDecrease(room, remained),
+            (remained) => gameEmitFacade.emitStartTimerDecrease(room, remained),
             () => startGame(room)
           );
         }
@@ -124,41 +136,25 @@ export default io => {
         
     const startGame = (room) => {
       room.playing = true;
-      emitGameStart(room);
+      gameEmitFacade.emitGameStart(room);
+      
       gameTimer = new Timer(
         config.SECONDS_FOR_GAME,
-        (remained) => emitGameTimerDecrease(room, remained),
+        (remained) => {
+          if(remained && remained % Timings.PART_OF_RACE === 0) {
+            gameEmitFacade.emitNewComment(room, commentTypes.PART_RACE, {remainedTime: remained});
+          }
+          gameEmitFacade.emitGameTimerDecrease(room, remained);
+        },
         () => {
-          emitGameEnd(room, room.players.map(player => ({
-            username: player.username,
-            remained: player.gameProgress.completedAt
-          })));
+          gameEmitFacade.emitGameEnd(room)
+          
           room.playing = false;
           room.players.forEach(player => player.resetGameAttributes());
-          io.to(room.name).emit('updatePlayerList', room.players);
+          gameEmitFacade.emitPlayerListUpdate(room);
         }
       );
     };
-
-    const emitGameTimerDecrease = (room, time) => {
-      io.to(room.name).emit('updateGameTimer', time);
-    };
-
-    const emitStartTimerDecrease = (room, time) => {
-      io.to(room.name).emit('updateStartTimer', time);
-    };
-
-    const emitGameStart = (room) => {
-      const text = getRandomText();
-      io.to(room.name).emit('startGame', text, config.SECONDS_FOR_GAME);
-    };
-
-    const emitGameEnd = (room, playerPositions) => {
-      io.to(room.name).emit('endGame', playerPositions);
-    }
   });
-};
 
-const getRandomText = () => texts[
-  Math.floor(Math.random() * texts.length)
-];
+};

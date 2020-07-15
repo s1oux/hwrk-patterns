@@ -1,3 +1,5 @@
+import Timings from './constants/gameConstants';
+
 export default class User {
   constructor(username) {
     this.username = username;
@@ -8,8 +10,8 @@ export default class User {
     this.gameProgress = {
       text: '',
       rightPrinted: '',
-      currentPosition: 0,
-      completedAt: 60
+      positionInText: 0,
+      completedAt: Timings.RACE_TIME
     }
   }
 
@@ -21,14 +23,7 @@ export default class User {
     this.room = room;
   }
 
-  clearSocketId() {
-    this.socketId = 0;
-  }
-
-  clearRoom() {
-    this.room = '';
-  }
-
+  
   setGameProgressInitText(text) {
     this.gameProgress = {
       ...this.gameProgress,
@@ -40,14 +35,14 @@ export default class User {
     this.gameProgress = {
       ...this.gameProgress,
       rightPrinted: this.gameProgress.rightPrinted + letter,
-      currentPosition: this.gameProgress.currentPosition + 1
+      positionInText: this.gameProgress.positionInText + 1
     };
   }
 
   setCompletedTime(remainedTime) {
     this.gameProgress = {
       ...this.gameProgress,
-      completedAt: remainedTime
+      completedAt: (Timings.RACE_TIME - remainedTime)
     };
   }
 
@@ -59,16 +54,28 @@ export default class User {
     return this.gameProgress.text;
   }
 
-  getCurrentPosition() {
-    return this.gameProgress.currentPosition;
+  getPositionInText() {
+    return this.gameProgress.positionInText;
+  }
+
+  getCompletionTime() {
+    return this.gameProgress.completedAt;
+  }
+
+  clearSocketId() {
+    this.socketId = 0;
+  }
+
+  clearRoom() {
+    this.room = '';
   }
 
   clearGameProgress() {
     this.gameProgress = {
       text: '',
       rightPrinted: '',
-      currentPosition: 0,
-      completedAt: 60
+      positionInText: 0,
+      completedAt: Timings.RACE_TIME
     }
   }
 

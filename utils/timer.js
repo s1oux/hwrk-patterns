@@ -1,3 +1,5 @@
+import Timings from './constants/gameConstants';
+
 export default class Timer {
   constructor(initTime, timerAction, finishAction) {
     this.secondsRemained = initTime;
@@ -8,7 +10,7 @@ export default class Timer {
         this.stopTimer();
         finishAction();
       }
-    }, 1000);
+    }, Timings.SECOND_IN_MS);
   }
 
   stopTimer() {

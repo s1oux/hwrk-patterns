@@ -6,7 +6,7 @@ import {
 } from '../helpers/uiHelper.mjs';
 
 export const updateRoomsList = (rooms) => {
-  const roomContainer = getElement('rooms-page__container');
+  const roomContainer = getElement("rooms-page__container");
   clearContainer(roomContainer);
   const roomsElement = createRooms(rooms);
   roomContainer.appendChild(roomsElement);
@@ -55,9 +55,8 @@ const createRoom = (room, selectRoom) => {
 
 const createRoomsSelector = () => {
   return (event, room) => {
-    const username = sessionStorage.getItem("username");
-    const query = `room=${room.name}&username=${username}`;
-    window.location.replace(`/game?${query}`);
+    localStorage.setItem("room", room.name);
+    window.location.replace("/game");
   };
 };
 
